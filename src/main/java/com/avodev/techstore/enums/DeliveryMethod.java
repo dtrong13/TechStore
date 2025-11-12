@@ -1,8 +1,11 @@
 package com.avodev.techstore.enums;
 
+import lombok.Getter;
+
 import java.util.Map;
 import java.util.TreeMap;
 
+@Getter
 public enum DeliveryMethod {
     STANDARD("Giao hàng tiêu chuẩn"),
     EXPRESS("Giao hàng nhanh"),
@@ -12,10 +15,6 @@ public enum DeliveryMethod {
 
     DeliveryMethod(String label) {
         this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
     }
 
     public static Map<String, String> getDeliveryMethod() {

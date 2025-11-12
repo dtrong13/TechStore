@@ -10,15 +10,11 @@ public enum ErrorCode {
     INVALID_KEY(1001, "Invalid input key.", HttpStatus.BAD_REQUEST),
     INVALID_PHONENUMBER(1002, "Phone number must contain exactly 10 digits.", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1003, "Password must be at least {min} characters long.", HttpStatus.BAD_REQUEST),
-    INVALID_DOB(1004, "User must be at least {min} years old.", HttpStatus.BAD_REQUEST),
     INVALID_FULLNAME(1005, "Full name must be at least {min} characters long.", HttpStatus.BAD_REQUEST),
 
     // ================= User Errors =================
     USER_EXISTED(2001, "User already exists.", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(2002, "User not found.", HttpStatus.NOT_FOUND),
-
-    PERMISSION_EXISTED(2003, "Permission already exists.", HttpStatus.NOT_FOUND),
-    PERMISSION_NOT_EXISTED(2004, "Permission not found.", HttpStatus.BAD_REQUEST),
 
     ROLE_EXISTED(2003, "Role already exists.", HttpStatus.NOT_FOUND),
     ROLE_NOT_EXISTED(2004, "Role not found.", HttpStatus.BAD_REQUEST),

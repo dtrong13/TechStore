@@ -7,6 +7,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: mihon1301
+    hikari:
+      initialization-fail-timeout: 0
 
   jpa:
     show-sql: true
@@ -14,7 +16,7 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
   servlet:
@@ -25,4 +27,4 @@ spring:
 jwt:
   signerKey: "XEF4o60QlnUab50D+miVqF9NwhLPTiHXBA5VDO9tMDTiiPuUB/oJpgpAC36ozg6A"
   valid-duration: 3600 # in seconds
-  refreshable-duration: 36000 # in seconds
+  refreshable-duration: 604800 # in seconds

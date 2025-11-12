@@ -26,17 +26,4 @@ public class Role {
     @Column(name = "name", nullable = false, length = 20)
     String name;
 
-    @Column(name = "description")
-    String description;
-
-    @ManyToMany(mappedBy = "roles")
-    Set<User> users;
-
-    @ManyToMany
-    @JoinTable(
-            name = "role_permissions",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    Set<Permission> permissions;
 }

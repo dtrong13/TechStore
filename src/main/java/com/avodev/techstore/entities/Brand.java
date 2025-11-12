@@ -23,4 +23,7 @@ public class Brand {
 
     @Column(name = "logo_url", length = 300)
      String logoUrl;
+
+
+
 }

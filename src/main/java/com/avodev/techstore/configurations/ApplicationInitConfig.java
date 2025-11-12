@@ -1,6 +1,5 @@
 package com.avodev.techstore.configurations;
 
-
 import com.avodev.techstore.constant.PredefineRole;
 import com.avodev.techstore.entities.Role;
 import com.avodev.techstore.entities.User;
@@ -17,9 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Configuration
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -30,29 +26,24 @@ public class ApplicationInitConfig {
     static final String ADMIN_PASSWORD = "admin";
 
     @Bean
-    @ConditionalOnProperty(prefix = "spring", value = "datasource.driverClassName", havingValue = "com.mysql.cj.jdbc.Driver")
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
             log.info("Init application ...");
-            if (!roleRepository.existsByName(PredefineRole.USER_ROLE)) {
-                roleRepository.save(Role.builder()
-                        .name(PredefineRole.USER_ROLE)
-                        .description("User role")
-                        .build());
-            }
+
+            // Tạo role ADMIN nếu chưa tồn tại
             Role adminRole = roleRepository.findByName(PredefineRole.ADMIN_ROLE)
                     .orElseGet(() -> roleRepository.save(Role.builder()
                             .name(PredefineRole.ADMIN_ROLE)
-                            .description("Admin role")
                             .build()));
+
+
+            // Tạo admin user nếu chưa tồn tại
             if (userRepository.findByPhoneNumber(ADMIN_PHONE_NUMBER).isEmpty()) {
-                Set<Role> roles = new HashSet<>();
-                roles.add(adminRole);
-                roleRepository.findByName(PredefineRole.USER_ROLE).ifPresent(roles::add);
                 User user = User.builder()
                         .phoneNumber(ADMIN_PHONE_NUMBER)
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
-                        .roles(roles)
+                        .role(adminRole)
+                        .active(true)
                         .build();
                 try {
                     userRepository.save(user);
@@ -62,8 +53,9 @@ public class ApplicationInitConfig {
                     log.info("Admin user creation skipped due to concurrent creation.");
                 }
             }
-            log.info("Application initialization completed.");
 
+            log.info("Application initialization completed.");
         };
     }
+
 }

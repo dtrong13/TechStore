@@ -30,11 +30,6 @@ public class CustomJwtDecoder implements JwtDecoder {
 
     @Override
     public Jwt decode(String token) throws JwtException {
-        if (token == null || token.isEmpty()) {
-            // Không decode token, public endpoint
-            return null;
-        }
-
         try {
             var response = authenticationService.introspect(
                     IntrospectRequest.builder().token(token).build());

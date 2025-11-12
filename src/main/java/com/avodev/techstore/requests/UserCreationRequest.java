@@ -1,5 +1,6 @@
 package com.avodev.techstore.requests;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -13,16 +14,14 @@ import java.time.LocalDate;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
-    @Size(min = 8, message = "INVALID_FULLNAME")
+    @NotBlank
     String fullName;
 
     @Pattern(regexp = "\\d{10}", message = "INVALID_PHONENUMBER")
     String phoneNumber;
 
-    String address;
-
     @Size(min = 8, message = "INVALID_PASSWORD")
     String password;
 
-    LocalDate dateOfBirth;
+
 }

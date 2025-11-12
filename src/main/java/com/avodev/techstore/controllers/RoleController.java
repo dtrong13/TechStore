@@ -1,10 +1,8 @@
 package com.avodev.techstore.controllers;
 
 
-import com.avodev.techstore.requests.PermissionRequest;
 import com.avodev.techstore.requests.RoleRequest;
 import com.avodev.techstore.responses.ApiResponse;
-import com.avodev.techstore.responses.PermissionResponse;
 import com.avodev.techstore.responses.RoleResponse;
 import com.avodev.techstore.services.RoleService;
 import lombok.AccessLevel;
@@ -22,23 +20,23 @@ import java.util.List;
 @Slf4j
 public class RoleController {
     RoleService roleService;
-    @PostMapping
 
+    @PostMapping
     ApiResponse<RoleResponse> createRole(@RequestBody RoleRequest roleRequest) {
         return ApiResponse.<RoleResponse>builder()
-                .result(roleService.createRole(roleRequest))
+                .data(roleService.createRole(roleRequest))
                 .build();
     }
 
     @GetMapping
     ApiResponse<List<RoleResponse>> getAllRoles() {
         return ApiResponse.<List<RoleResponse>>builder()
-                .result(roleService.getAllRoles())
+                .data(roleService.getAllRoles())
                 .build();
     }
 
     @DeleteMapping("/{role}")
-    ApiResponse<Void> delete(@PathVariable String role) {
+    ApiResponse<Void> deleteRole(@PathVariable String role) {
         roleService.deleteRole(role);
         return ApiResponse.<Void>builder()
                 .message("Role deleted successfully.")

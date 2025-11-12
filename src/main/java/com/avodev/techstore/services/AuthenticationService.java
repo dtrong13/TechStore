@@ -27,14 +27,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.StringJoiner;
 import java.util.UUID;
 
 @Slf4j
@@ -57,7 +55,7 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
+    public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {
         User user = userRepository.findByPhoneNumber(authenticationRequest.getPhoneNumber())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -65,12 +63,10 @@ public class AuthenticationService {
         if (!authenticated) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        var accessToken = generateToken(user, VALID_DURATION, "access");
-        var refreshToken = generateToken(user, REFRESHABLE_DURATION, "refresh");
+        String accessToken = generateToken(user, VALID_DURATION, "access");
         return AuthenticationResponse.builder()
                 .authenticated(true)
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -79,7 +75,7 @@ public class AuthenticationService {
         boolean isValid = true;
 
         try {
-            verifyToken(token,"access");
+            verifyToken(token, "access");
         } catch (AppException e) {
             isValid = false;
         }
@@ -113,12 +109,21 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, REFRESHABLE_DURATION, "refresh");
+    }
+
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), "refresh");
 
             String jit = signToken.getJWTClaimsSet().getJWTID();
-            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+            LocalDate expiryTime = signToken.getJWTClaimsSet()
+                    .getExpirationTime()                  // trả về java.util.Date
+                    .toInstant()                          // chuyển sang Instant
+                    .atZone(ZoneId.systemDefault())       // gắn múi giờ (ZoneId)
+                    .toLocalDate();
 
             InvalidatedToken invalidatedToken =
                     InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
@@ -137,28 +142,18 @@ public class AuthenticationService {
         var user =
                 userRepository.findByPhoneNumber(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-        var accesToken = generateToken(user, VALID_DURATION, "access");
+        String accesToken = generateToken(user, VALID_DURATION, "access");
 
         return AuthenticationResponse.builder()
                 .accessToken(accesToken)
-                .refreshToken(request.getToken())
                 .authenticated(true).build();
     }
 
 
     private String buildScope(User user) {
-        StringJoiner scope = new StringJoiner(" ");
-        if (!CollectionUtils.isEmpty(user.getRoles())) {
-            StringJoiner roles = new StringJoiner(" ");
-            user.getRoles().forEach(role -> {
-                scope.add("ROLE_" + role.getName());
-                if (!CollectionUtils.isEmpty(role.getPermissions())) {
-                    role.getPermissions().forEach(permission -> scope.add(permission.getName()));
-                }
-            });
-        }
-        return scope.toString();
+        return "ROLE_" + user.getRole().toString();
     }
+
     private SignedJWT verifyToken(String token, String tokenType) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 

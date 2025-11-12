@@ -45,9 +45,10 @@ public class UserService {
         User user = userMapper.toUser(userCreationRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
-        HashSet<Role> roles = new HashSet<>();
-        roleRepository.findByName(PredefineRole.USER_ROLE).ifPresent(roles::add);
-        user.setRoles(roles);
+        Role role = roleRepository.findByName(PredefineRole.USER_ROLE).orElseGet(() -> roleRepository.save(Role.builder()
+                .name(PredefineRole.USER_ROLE)
+                .build()));
+        user.setRole(role);
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {

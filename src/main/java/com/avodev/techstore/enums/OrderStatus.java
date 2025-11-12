@@ -1,8 +1,11 @@
 package com.avodev.techstore.enums;
 
+import lombok.Getter;
+
 import java.util.Map;
 import java.util.TreeMap;
 
+@Getter
 public enum OrderStatus {
     PENDING("Chờ xác nhận"),
     PROCESSING("Đang xử lý"),
@@ -14,10 +17,6 @@ public enum OrderStatus {
 
     OrderStatus(String label) {
         this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
     }
 
     public static Map<String, String> getStatus() {
