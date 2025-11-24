@@ -17,7 +17,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -34,7 +33,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults()) // Spring sẽ dùng CorsConfigurationSource bean
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/**", "/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "users/register").permitAll() // login, register, refresh
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

@@ -1,6 +1,5 @@
 package com.avodev.techstore.requests;
 
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,7 +8,12 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationRequest {
+public class AddressRequest {
+    String recipientName;
     String phoneNumber;
-    String password;
+    String province;
+    String commune;
+    String addressType;
+    String addressDetail;
+    Boolean isDefault;
 }

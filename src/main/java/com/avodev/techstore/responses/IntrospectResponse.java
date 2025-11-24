@@ -3,17 +3,11 @@ package com.avodev.techstore.responses;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String fullName;
-    String gender;
-    LocalDate dateOfBirth;
-    String hiddenPhone;
-
+public class IntrospectResponse {
+    boolean valid;
 }

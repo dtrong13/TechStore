@@ -1,17 +1,16 @@
 package com.avodev.techstore.requests;
 
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
-
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RoleRequest {
-    String name;
-    String description;
+public class ChangePasswordRequest {
+    String oldPassword;
+    String newPassword;
+
 }

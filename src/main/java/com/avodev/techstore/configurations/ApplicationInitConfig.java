@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,7 +34,6 @@ public class ApplicationInitConfig {
                     .orElseGet(() -> roleRepository.save(Role.builder()
                             .name(PredefineRole.ADMIN_ROLE)
                             .build()));
-
 
             // Tạo admin user nếu chưa tồn tại
             if (userRepository.findByPhoneNumber(ADMIN_PHONE_NUMBER).isEmpty()) {

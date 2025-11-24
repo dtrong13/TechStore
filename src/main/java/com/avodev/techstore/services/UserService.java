@@ -1,32 +1,31 @@
 package com.avodev.techstore.services;
 
+import com.avodev.techstore.constant.PredefineRole;
 import com.avodev.techstore.entities.Role;
 import com.avodev.techstore.entities.User;
+import com.avodev.techstore.enums.Gender;
 import com.avodev.techstore.exceptions.AppException;
 import com.avodev.techstore.exceptions.ErrorCode;
+import com.avodev.techstore.mappers.AddressMapper;
 import com.avodev.techstore.mappers.UserMapper;
 import com.avodev.techstore.repositories.RoleRepository;
 import com.avodev.techstore.repositories.UserRepository;
-import com.avodev.techstore.requests.UserCreationRequest;
+import com.avodev.techstore.requests.RegisterRequest;
+import com.avodev.techstore.requests.UserDeleteRequest;
 import com.avodev.techstore.requests.UserUpdateRequest;
+import com.avodev.techstore.responses.RegisterResponse;
 import com.avodev.techstore.responses.UserResponse;
-import com.avodev.techstore.constant.PredefineRole;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,14 +34,15 @@ import java.util.List;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    AddressMapper addressMapper;
     PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
 
-    public UserResponse createUser(UserCreationRequest userCreationRequest) {
-        if (userRepository.existsByPhoneNumber(userCreationRequest.getPhoneNumber())) {
+    public RegisterResponse register(RegisterRequest registerRequest) {
+        if (userRepository.existsByPhoneNumber(registerRequest.getPhoneNumber())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        User user = userMapper.toUser(userCreationRequest);
+        User user = userMapper.registerToUser(registerRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
         Role role = roleRepository.findByName(PredefineRole.USER_ROLE).orElseGet(() -> roleRepository.save(Role.builder()
@@ -54,7 +54,7 @@ public class UserService {
         } catch (DataIntegrityViolationException exception) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        return userMapper.toUserResponse(user);
+        return userMapper.toRegisterResponse(user);
     }
 
     public UserResponse getMyInfo() {
@@ -65,36 +65,51 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
-    }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> getUsers() {
-        log.info("In method get Users");
-        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse getUser(Long id) {
-        return userMapper.toUserResponse(
-                userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
-    }
-
-    @PreAuthorize("#request.phoneNumber == authentication.name")
-    public UserResponse updateUser(Long userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setFullName(request.getFullName());
-        user.setAddress(request.getAddress());
-        user.setDateOfBirth(request.getDateOfBirth());
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+    @Transactional
+    public UserResponse updateProfile(UserUpdateRequest request) {
+        // Lấy user hiện tại từ security context
+        User currentUser = getCurrentUser();
+        currentUser.setFullName(request.getFullName());
+        currentUser.setDateOfBirth(request.getDateOfBirth());
+        try {
+            currentUser.setGender(Gender.fromLabel(request.getGender()));
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_GENDER_TYPE);
         }
+        User saved = userRepository.save(currentUser);
+        return userMapper.toUserResponse(saved);
 
-        return userMapper.toUserResponse(userRepository.save(user));
     }
+
+    private User getCurrentUser() {
+        String phoneNumber = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    public void deleteAccount(UserDeleteRequest request) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null || !passwordEncoder.matches(request.getPassword(), currentUser.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_INCORRECT);
+        }
+        currentUser.setActive(false);
+        userRepository.save(currentUser);
+    }
+
+//
+//
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public List<RegisterResponse> getUsers() {
+//        log.info("In method get Users");
+//        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
+//    }
+//
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public RegisterResponse getUser(Long id) {
+//        return userMapper.toUserResponse(
+//                userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
+//    }
 
 
 }

@@ -3,6 +3,7 @@ package com.avodev.techstore.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductVariant extends BaseEntity  {
+public class ProductVariant extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -22,7 +23,7 @@ public class ProductVariant extends BaseEntity  {
     @JoinColumn(name = "product_id")
     Product product;
 
-    @Column(name = "variant_name",  nullable = false, length = 250)
+    @Column(name = "variant_name", nullable = false, length = 250)
     String variantName;
 
     @Column(name = "storage", nullable = false, length = 50)
@@ -36,6 +37,9 @@ public class ProductVariant extends BaseEntity  {
 
     @Column(name = "stock_quantity")
     Integer stockQuantity;
+
+    @OneToOne(mappedBy = "productVariant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Discount discount;
 
 }
 
