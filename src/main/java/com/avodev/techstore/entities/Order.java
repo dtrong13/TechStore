@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -28,8 +27,9 @@ public class Order {
     @JoinColumn(name = "user_id")
     User user;
 
-    @Column(name = "address", nullable = false, length = 250)
-    String address;
+    @ManyToOne
+    @JoinColumn(name = "shipping_address_id", nullable = false)
+    Address address;
 
     @Column(name = "customer_note")
     String customerNote;
@@ -42,7 +42,7 @@ public class Order {
     OrderStatus status;
 
     @Column(name = "total_money")
-    BigDecimal totalMoney;
+    Long totalMoney;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_method")

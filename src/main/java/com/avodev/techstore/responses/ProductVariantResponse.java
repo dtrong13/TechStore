@@ -4,8 +4,6 @@ package com.avodev.techstore.responses;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,9 +12,9 @@ import java.math.BigDecimal;
 public class ProductVariantResponse {
     Long id;
     String variantName;
-    BigDecimal price;
+    Long price;
     Integer stockQuantity;
     String discountText;
-    BigDecimal finalPrice;
+    Long finalPrice;
     String imageUrl;
 }

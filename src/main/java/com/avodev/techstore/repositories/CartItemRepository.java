@@ -2,6 +2,7 @@ package com.avodev.techstore.repositories;
 
 import com.avodev.techstore.entities.Cart;
 import com.avodev.techstore.entities.CartItem;
+import com.avodev.techstore.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +15,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByCart(Cart cart);
 
     Optional<CartItem> findByCartAndVariantId(Cart cart, Long variantId);
+
+    List<CartItem> findByUserAndVariantIn(User user, List<Long> ids);
 
     List<CartItem> findByCartAndVariantIdIn(Cart cart, List<Long> variantIds);
 

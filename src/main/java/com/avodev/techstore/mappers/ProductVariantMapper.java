@@ -25,21 +25,34 @@ public class ProductVariantMapper {
         response.setPrice(productVariant.getPrice());
         response.setStockQuantity(productVariant.getStockQuantity());
 
-        BigDecimal finalPrice = productVariant.getPrice();
+        Long finalPrice = productVariant.getPrice();
         Discount discount = productVariant.getDiscount();
         StringBuilder discountText = new StringBuilder();
 
         if (discount != null && Boolean.TRUE.equals(discount.getActive())) {
             if (discount.getType() == DiscountType.PERCENT) {
+                // Phần trăm giảm
+                BigDecimal percent = discount.getValue();
                 discountText.append("Giảm ")
-                        .append(discount.getValue().intValue())
+                        .append(percent.stripTrailingZeros().toPlainString())
                         .append("%");
-                finalPrice = finalPrice.subtract(finalPrice.multiply(discount.getValue().divide(new BigDecimal(100))));
+
+                // Tính tiền giảm: finalPrice * percent / 100
+                long discountAmount = Math.round(finalPrice * percent.doubleValue() / 100);
+                finalPrice -= discountAmount;
+
             } else if (discount.getType() == DiscountType.FIXED) {
+                // Số tiền cố định giảm
+                BigDecimal fixed = discount.getValue();
                 discountText.append("Giảm ")
-                        .append(discount.getValue().setScale(0, RoundingMode.HALF_UP))
+                        .append(fixed.setScale(0, RoundingMode.HALF_UP).toPlainString())
                         .append("₫");
-                finalPrice = finalPrice.subtract(discount.getValue());
+
+                long discountAmount = fixed.setScale(0, RoundingMode.HALF_UP).longValue();
+                finalPrice -= discountAmount;
+            }
+            if (finalPrice < 0) {
+                finalPrice = 0L;
             }
         }
 

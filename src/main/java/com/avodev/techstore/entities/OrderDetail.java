@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "order_details")
 @Getter
@@ -28,7 +26,7 @@ public class OrderDetail {
     ProductVariant productVariant;
 
     @Column(name = "price")
-    BigDecimal price;
+    Long price;
 
     @Column(name = "quantity")
     Integer quantity;

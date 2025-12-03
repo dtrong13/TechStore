@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -28,7 +27,7 @@ public class ProductVariant extends BaseEntity {
     String variantName;
 
     @Column(name = "price", nullable = false)
-    BigDecimal price;
+    Long price;
 
     @Column(name = "stock_quantity")
     Integer stockQuantity;

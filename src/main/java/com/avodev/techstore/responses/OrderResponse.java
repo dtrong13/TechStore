@@ -1,9 +1,19 @@
 package com.avodev.techstore.responses;
 
-import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse {
     AddressResponse deliveryAddress;
     String customerNote;
@@ -11,7 +21,9 @@ public class OrderResponse {
     String paymentMethod;
     String status;
     LocalDateTime orderDate;
-    BigDecimal totalMoney;
+    Long subtotal;
+    Long shippingFee;
+    Long totalMoney;
     String trackingNumber;
     List<OrderItemResponse> items;
 }

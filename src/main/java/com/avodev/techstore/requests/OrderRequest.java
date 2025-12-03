@@ -17,4 +17,5 @@ public class OrderRequest {
     String deliveryMethod;
     String paymentMethod;
     List<OrderItemRequest> items;
+    Boolean fromCart;
 }

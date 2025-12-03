@@ -24,4 +24,13 @@ public enum DeliveryMethod {
         }
         return map;
     }
+
+    public static DeliveryMethod fromLabel(String label) {
+        for (DeliveryMethod method : values()) {
+            if (method.getLabel().equalsIgnoreCase(label)) {
+                return method;
+            }
+        }
+        throw new IllegalArgumentException("Invalid delivery method: " + label);
+    }
 }

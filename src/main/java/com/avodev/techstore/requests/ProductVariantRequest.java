@@ -4,7 +4,6 @@ package com.avodev.techstore.requests;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +16,8 @@ public class ProductVariantRequest {
     Long productId;
     Long brandId;
     Long categoryId;
-    BigDecimal minPrice;
-    BigDecimal maxPrice;
+    Long minPrice;
+    Long maxPrice;
     Boolean inStock;
     String keyword;
     Map<Long, List<String>> specFilters;

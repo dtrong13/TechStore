@@ -25,4 +25,13 @@ public enum PaymentMethod {
         }
         return map;
     }
+
+    public static PaymentMethod fromLabel(String label) {
+        for (PaymentMethod method : values()) {
+            if (method.getLabel().equalsIgnoreCase(label)) {
+                return method;
+            }
+        }
+        throw new IllegalArgumentException("Invalid payment method: " + label);
+    }
 }

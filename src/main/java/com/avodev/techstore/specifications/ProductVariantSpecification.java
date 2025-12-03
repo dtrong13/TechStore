@@ -7,7 +7,6 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +36,7 @@ public final class ProductVariantSpecification {
         };
     }
 
-    public static Specification<ProductVariant> priceBetween(BigDecimal minPrice, BigDecimal maxPrice) {
+    public static Specification<ProductVariant> priceBetween(Long minPrice, Long maxPrice) {
         return (root, query, cb) -> {
             if (minPrice == null && maxPrice == null) return cb.conjunction();
 
