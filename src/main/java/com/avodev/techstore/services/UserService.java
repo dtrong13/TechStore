@@ -88,6 +88,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
+    @Transactional
     public void deleteAccount(UserDeleteRequest request) {
         User currentUser = getCurrentUser();
         if (currentUser == null || !passwordEncoder.matches(request.getPassword(), currentUser.getPassword())) {

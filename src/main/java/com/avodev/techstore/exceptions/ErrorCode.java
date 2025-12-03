@@ -21,8 +21,11 @@ public enum ErrorCode {
     USER_EXISTED(2001, "User already exists.", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(2002, "User not found.", HttpStatus.NOT_FOUND),
 
-    ROLE_EXISTED(2003, "Role already exists.", HttpStatus.NOT_FOUND),
-    ROLE_NOT_EXISTED(2004, "Role not found.", HttpStatus.BAD_REQUEST),
+    ROLE_EXISTED(2003, "Role already exists.", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_EXISTED(2004, "Role not found.", HttpStatus.NOT_FOUND),
+
+    PRODUCT_VARIANT_NOT_EXISTED(2005, "Product variant not found.", HttpStatus.NOT_FOUND),
+    NOT_ENOUGH_STOCK(2006, "Product variant not found.", HttpStatus.NOT_FOUND),
 
 
     // ================= Authentication / Authorization Errors =================

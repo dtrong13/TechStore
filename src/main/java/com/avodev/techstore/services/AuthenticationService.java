@@ -1,6 +1,7 @@
 package com.avodev.techstore.services;
 
 import com.avodev.techstore.entities.InvalidatedToken;
+import com.avodev.techstore.entities.Role;
 import com.avodev.techstore.entities.User;
 import com.avodev.techstore.exceptions.AppException;
 import com.avodev.techstore.exceptions.ErrorCode;
@@ -74,6 +75,12 @@ public class AuthenticationService {
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        String token = request.getToken();
+        if (token == null || token.isBlank()) {
+            log.info("No refresh token to invalidate");
+            return;
+        }
+
         try {
             var signToken = verifyToken(request.getToken(), "refresh");
 
@@ -107,6 +114,23 @@ public class AuthenticationService {
     }
 
     public LoginResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        String token = request.getToken();
+        if (token == null || token.isBlank()) {
+            User guestUser = User.builder()
+                    .phoneNumber("anonymous")
+                    .fullName("Guest")
+                    .role(Role.builder().name("GUEST").build()) // role GUEST
+                    .build();
+
+            String dummyToken = generateToken(guestUser, VALID_DURATION, "access");
+
+            return LoginResponse.builder()
+                    .accessToken(dummyToken)
+                    .authenticated(false)
+                    .build();
+        }
+
+
         var signedJWT = verifyToken(request.getToken(), "refresh");
 
         var username = signedJWT.getJWTClaimsSet().getSubject();

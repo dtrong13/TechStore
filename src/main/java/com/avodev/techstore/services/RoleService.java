@@ -1,7 +1,6 @@
 package com.avodev.techstore.services;
 
 
-
 import com.avodev.techstore.entities.Role;
 import com.avodev.techstore.exceptions.AppException;
 import com.avodev.techstore.exceptions.ErrorCode;
@@ -14,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -27,18 +26,20 @@ public class RoleService {
     RoleMapper roleMapper;
 
     public RoleResponse createRole(RoleRequest roleRequest) {
-        if (roleRepository.existsByName(roleRequest.getName())){
+        if (roleRepository.existsByName(roleRequest.getName())) {
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
         Role role = roleMapper.toRole(roleRequest);
         role = roleRepository.save(role);
         return roleMapper.toRoleResponse(role);
     }
+
     public List<RoleResponse> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
         return roles.stream().map(roleMapper::toRoleResponse).toList();
     }
 
+    @Transactional
     public void deleteRole(String roleName) {
         if (!roleRepository.existsByName(roleName)) {
             throw new AppException(ErrorCode.ROLE_NOT_EXISTED);

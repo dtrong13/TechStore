@@ -32,11 +32,12 @@ public class GlobalExceptionHandle {
     }
 
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse<Void>> handlingAppException(AppException exception) {
+    ResponseEntity<ApiResponse<Object>> handlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse<Void> apiResponse = new ApiResponse<>();
+        ApiResponse<Object> apiResponse = new ApiResponse<>();
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
+        apiResponse.setData(exception.getMeta());
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
@@ -57,7 +58,7 @@ public class GlobalExceptionHandle {
         try {
             errorCode = ErrorCode.valueOf(enumKey);
             var constraintViolation = exception.getBindingResult().getAllErrors().getFirst().unwrap(ConstraintViolation.class);
-             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+            attributes = constraintViolation.getConstraintDescriptor().getAttributes();
             log.info("Validation attributes: {}", attributes);
         } catch (IllegalArgumentException exception1) {
             log.error("Exception: ", exception1);

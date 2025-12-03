@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "wishlist_items", uniqueConstraints = @UniqueConstraint(columnNames = {"wishlist_id", "variant_id"}))
 @Getter
@@ -19,9 +21,12 @@ public class WishlistItem {
 
     @ManyToOne
     @JoinColumn(name = "wishlist_id", nullable = false)
-    private Wishlist wishlist;
+    Wishlist wishlist;
 
     @ManyToOne
     @JoinColumn(name = "variant_id", nullable = false)
-    private ProductVariant variant;
+    ProductVariant variant;
+
+    @Column(name = "create_at")
+    LocalDateTime createdAt;
 }

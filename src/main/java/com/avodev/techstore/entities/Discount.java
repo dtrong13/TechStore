@@ -36,7 +36,7 @@ public class Discount {
     LocalDateTime endDate;
 
     @Column(name = "is_active", nullable = false)
-    Boolean isActive = true;
+    Boolean active = true;
 
     @OneToOne
     @JoinColumn(name = "product_variant_id", nullable = false)

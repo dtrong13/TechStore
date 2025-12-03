@@ -1,5 +1,8 @@
 package com.avodev.techstore.entities;
 
+import com.avodev.techstore.enums.DeliveryMethod;
+import com.avodev.techstore.enums.OrderStatus;
+import com.avodev.techstore.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -7,8 +10,6 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import com.avodev.techstore.enums.*;
 
 @Entity
 @Table(name = "orders")
@@ -27,16 +28,7 @@ public class Order {
     @JoinColumn(name = "user_id")
     User user;
 
-    @Column(name = "fullname", nullable = false,length = 100)
-    String fullName;
-
-    @Column(name = "email", nullable = false,length = 100)
-    String email;
-
-    @Column(name = "phone_number", nullable = false,length = 10)
-    String phoneNumber;
-
-    @Column(name = "address", nullable = false,length = 250)
+    @Column(name = "address", nullable = false, length = 250)
     String address;
 
     @Column(name = "customer_note")
@@ -59,7 +51,7 @@ public class Order {
     @Column(name = "delivery_date")
     LocalDate deliveryDate;
 
-    @Column(name = "tracking_number",  nullable = false,length = 100, unique = true)
+    @Column(name = "tracking_number", nullable = false, length = 100, unique = true)
     String trackingNumber;
 
     @Enumerated(EnumType.STRING)

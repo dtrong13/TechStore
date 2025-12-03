@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = {"cart_id", "variant_id"}))
 @Getter
@@ -19,11 +21,14 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
+    Cart cart;
 
     @ManyToOne
     @JoinColumn(name = "variant_id", nullable = false)
-    private ProductVariant variant;
+    ProductVariant variant;
+    
+    Integer quantity;
 
-    private Integer quantity = 1;
+    @Column(name = "create_at")
+    LocalDateTime createdAt;
 }

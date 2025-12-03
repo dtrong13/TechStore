@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "product_variants")
@@ -26,12 +27,6 @@ public class ProductVariant extends BaseEntity {
     @Column(name = "variant_name", nullable = false, length = 250)
     String variantName;
 
-    @Column(name = "storage", nullable = false, length = 50)
-    String storage;
-
-    @Column(name = "color", nullable = false, length = 50)
-    String color;
-
     @Column(name = "price", nullable = false)
     BigDecimal price;
 
@@ -39,7 +34,11 @@ public class ProductVariant extends BaseEntity {
     Integer stockQuantity;
 
     @OneToOne(mappedBy = "productVariant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Discount discount;
+    Discount discount;
+
+    @OneToMany(mappedBy = "variant")
+    List<VariantImage> variantImages;
+
 
 }
 

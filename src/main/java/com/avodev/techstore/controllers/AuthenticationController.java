@@ -36,7 +36,7 @@ public class AuthenticationController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .path("auth/refresh")
+                .path("/auth/refresh")
                 .maxAge(loginRequest.isRememberMe() ? 7 * 24 * 60 * 60 : -1)
                 .sameSite("Strict")
                 .build();
@@ -56,7 +56,7 @@ public class AuthenticationController {
 
     @PostMapping("/refresh")
     public ApiResponse<LoginResponse> refresh(
-            @CookieValue(name = "refreshToken") String refreshTokenCookie)
+            @CookieValue(name = "refreshToken", required = false) String refreshTokenCookie)
             throws ParseException, JOSEException {
         RefreshRequest request = RefreshRequest.builder()
                 .token(refreshTokenCookie)
@@ -69,7 +69,7 @@ public class AuthenticationController {
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout(
-            @CookieValue(name = "refreshToken") String refreshTokenCookie,
+            @CookieValue(name = "refreshToken", required = false) String refreshTokenCookie,
             HttpServletResponse response) throws ParseException, JOSEException {
 
         // Invalidate
