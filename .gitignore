@@ -38,3 +38,5 @@ mvnw
 mvnw.cmd
 
 .gitattributes
+
+application.yml

@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults()) // Spring sẽ dùng CorsConfigurationSource bean
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "users/register").permitAll() // login, register, refresh
+                        .requestMatchers("/auth/**", "users/register", "/product-variants/search").permitAll() // login, register, refresh
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

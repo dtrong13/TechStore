@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    String findTrackingNumberByOrderId(Long orderId);
+    String findTrackingNumberById(Long orderId);
 
 
 }
