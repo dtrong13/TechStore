@@ -25,7 +25,8 @@ public enum ErrorCode {
     ROLE_NOT_EXISTED(2004, "Role not found.", HttpStatus.NOT_FOUND),
 
     PRODUCT_VARIANT_NOT_EXISTED(2005, "Product variant not found.", HttpStatus.NOT_FOUND),
-    NOT_ENOUGH_STOCK(2006, "Product variant not found.", HttpStatus.NOT_FOUND),
+    NOT_ENOUGH_STOCK(2006, "Not enough stock for this product variant.", HttpStatus.BAD_REQUEST),
+    CART_NOT_EXISTED(2006, "Cart not found.", HttpStatus.NOT_FOUND),
 
 
     // ================= Authentication / Authorization Errors =================

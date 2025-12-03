@@ -35,6 +35,7 @@ import java.util.Random;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderService {
     OrderRepository orderRepository;
+    CartRepository cartRepository;
     OrderDetailRepository orderDetailRepository;
     CartItemRepository cartItemRepository;
     ProductVariantRepository productVariantRepository;
@@ -98,11 +99,14 @@ public class OrderService {
             orderDetail.setPrice(productVariantResponse.getFinalPrice());
             orderDetailRepository.save(orderDetail);
         }
-        if (orderRequest.getFromCart()) {
+        if (Boolean.TRUE.equals(orderRequest.getFromCart())) {
             List<Long> variantIds = orderRequest.getItems().stream()
                     .map(OrderItemRequest::getVariantId)
                     .toList();
-            List<CartItem> cartItems = cartItemRepository.findByUserAndVariantIn(currentUser, variantIds);
+            Cart cart = cartRepository.findByUser(currentUser)
+                    .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+
+            List<CartItem> cartItems = cartItemRepository.findByCartAndVariantIn(cart, variantIds);
             cartItemRepository.deleteAll(cartItems);
         }
         preview.setOrderDate(now);
