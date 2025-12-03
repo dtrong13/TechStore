@@ -39,4 +39,4 @@ mvnw.cmd
 
 .gitattributes
 
-application.yml
+src/main/resources/application.yml
