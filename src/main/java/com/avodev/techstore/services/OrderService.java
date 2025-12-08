@@ -89,6 +89,7 @@ public class OrderService {
             if (variant.getStockQuantity() < item.getQuantity()) {
                 throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
             }
+
             variant.setStockQuantity(variant.getStockQuantity() - item.getQuantity());
             productVariantRepository.save(variant);
             OrderDetail orderDetail = new OrderDetail();
@@ -124,6 +125,10 @@ public class OrderService {
             ProductVariant productVariant = productVariantRepository.findById(item.getVariantId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
             ProductVariantResponse productVariantResponse = productVariantMapper.toProductVariantResponse(productVariant);
+            if (productVariant.getStockQuantity() < item.getQuantity()) {
+                throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
+            }
+            productVariantResponse.setStockQuantity(productVariant.getStockQuantity() - item.getQuantity());
             Long finalPrice = productVariantResponse.getFinalPrice();
             Integer quantity = item.getQuantity();
             responseItem.setQuantity(quantity);
