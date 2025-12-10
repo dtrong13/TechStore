@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
-    AddressMapper addressMapper;
     PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
 
@@ -68,7 +67,6 @@ public class UserService {
 
     @Transactional
     public UserResponse updateProfile(UserUpdateRequest request) {
-        // Lấy user hiện tại từ security context
         User currentUser = getCurrentUser();
         currentUser.setFullName(request.getFullName());
         currentUser.setDateOfBirth(request.getDateOfBirth());

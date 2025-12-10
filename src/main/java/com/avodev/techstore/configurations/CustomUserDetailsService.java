@@ -1,12 +1,9 @@
 package com.avodev.techstore.configurations;
 
-import com.avodev.techstore.entities.Role;
+
 import com.avodev.techstore.entities.User;
-import com.avodev.techstore.exceptions.AppException;
-import com.avodev.techstore.exceptions.ErrorCode;
 import com.avodev.techstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

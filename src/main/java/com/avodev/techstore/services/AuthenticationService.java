@@ -58,8 +58,12 @@ public class AuthenticationService {
     public LoginResult login(LoginRequest loginRequest) {
         User user = userRepository.findByPhoneNumber(loginRequest.getPhoneNumber())
                 .orElse(null);
-        if (user == null || !user.isActive()) {
-            throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
+        if (user == null) {
+            throw new AppException(ErrorCode.ACCOUNT_NOT_REGISTERED); // tài khoản chưa đăng ký
+        }
+
+        if (!user.isActive()) {
+            throw new AppException(ErrorCode.ACCOUNT_INACTIVE); // tài khoản đã bị khóa/chưa kích hoạt
         }
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {

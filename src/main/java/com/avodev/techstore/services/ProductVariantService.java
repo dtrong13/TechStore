@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 public class ProductVariantService {
 
     ProductVariantRepository productVariantRepository;
-    VariantImageService variantImageService;
     ProductVariantMapper productVariantMapper;
 
     public PageableResponse<ProductVariantResponse> searchProductVariants(SearchRequest<ProductVariantRequest> request) {

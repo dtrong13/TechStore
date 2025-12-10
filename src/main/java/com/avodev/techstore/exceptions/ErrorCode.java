@@ -34,6 +34,7 @@ public enum ErrorCode {
     UNAUTHORIZED(3002, "Access denied. Insufficient permissions.", HttpStatus.FORBIDDEN),
     INVALID_CREDENTIALS(3003, "Incorrect phone number or password. Please try logging in again.", HttpStatus.UNAUTHORIZED),
     ACCOUNT_INACTIVE(3004, "Account has been deleted or is no longer active.", HttpStatus.FORBIDDEN),
+    ACCOUNT_NOT_REGISTERED(3005, "This phone number is not registered.", HttpStatus.NOT_FOUND),
 
 
     // ================= User Errors =================
