@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +37,7 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     RoleRepository roleRepository;
+
 
     public RegisterResponse register(RegisterRequest registerRequest) {
         if (userRepository.existsByPhoneNumber(registerRequest.getPhoneNumber())) {
@@ -56,6 +58,7 @@ public class UserService {
         return userMapper.toRegisterResponse(user);
     }
 
+//  @PreAuthorize("hasRole('USER')")
     public UserResponse getMyInfo() {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -96,8 +99,7 @@ public class UserService {
         userRepository.save(currentUser);
     }
 
-//
-//
+
 //    @PreAuthorize("hasRole('ADMIN')")
 //    public List<RegisterResponse> getUsers() {
 //        log.info("In method get Users");

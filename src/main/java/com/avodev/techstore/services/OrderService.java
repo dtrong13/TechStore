@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -51,55 +51,103 @@ public class OrderService {
     }
 
     private String generateTrackingNumber() {
-        long millis = System.currentTimeMillis();
-        int random = new Random().nextInt(100);
-        return "TS" + String.format("%06d%02d", millis % 1000000, random);
+        return "TS-" + UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 12)
+                .toUpperCase();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponse previewOrder(OrderRequest orderRequest) {
+        User currentUser = getCurrentUser();
+
+        List<OrderItemResponse> responseItems =
+                buildOrderItems(orderRequest.getItems(), false);
+
+        Long subtotal = responseItems.stream()
+                .mapToLong(OrderItemResponse::getTotalItemPrice)
+                .sum();
+
+        Address address = addressRepository
+                .findByUserAndId(currentUser, orderRequest.getShippingAddressId())
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED));
+
+        DeliveryMethod deliveryMethod =
+                DeliveryMethod.fromLabel(orderRequest.getDeliveryMethod());
+
+        Long shippingFee = calculateShippingFee(subtotal, address, deliveryMethod);
+
+        OrderResponse response = new OrderResponse();
+        response.setDeliveryAddress(addressMapper.toAddressResponse(address));
+        response.setCustomerNote(orderRequest.getCustomerNote());
+        response.setDeliveryMethod(orderRequest.getDeliveryMethod());
+        response.setPaymentMethod(orderRequest.getPaymentMethod());
+        response.setShippingFee(shippingFee);
+        response.setSubtotal(subtotal);
+        response.setTotalMoney(subtotal + shippingFee);
+        response.setItems(responseItems);
+
+        return response;
     }
 
     @Transactional
     public OrderResponse placeOrder(OrderRequest orderRequest) {
-        OrderResponse preview = previewOrder(orderRequest);
-        Order order = new Order();
+
+        // build + lock + validate + tính tiền
+        List<OrderItemResponse> responseItems =
+                buildOrderItems(orderRequest.getItems(), true);
+
+        Long subtotal = responseItems.stream()
+                .mapToLong(OrderItemResponse::getTotalItemPrice)
+                .sum();
+
         User currentUser = getCurrentUser();
-        order.setUser(currentUser);
-        Address address = addressRepository.findByUserAndId(currentUser, orderRequest.getShippingAddressId())
+        Address address = addressRepository.findByUserAndId(
+                        currentUser, orderRequest.getShippingAddressId())
                 .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED));
+
+        DeliveryMethod deliveryMethod =
+                DeliveryMethod.fromLabel(orderRequest.getDeliveryMethod());
+
+        Long shippingFee = calculateShippingFee(subtotal, address, deliveryMethod);
+        Long totalMoney = subtotal + shippingFee;
+
+        Order order = new Order();
+        order.setUser(currentUser);
         order.setAddress(address);
         order.setCustomerNote(orderRequest.getCustomerNote());
-        LocalDateTime now = LocalDateTime.now();
-        order.setOrderDate(now);
-        order.setTotalMoney(preview.getTotalMoney());
-        order.setDeliveryMethod(DeliveryMethod.fromLabel(orderRequest.getDeliveryMethod()));
-        String trackingNumber = generateTrackingNumber();
-        order.setTrackingNumber(trackingNumber);
-        PaymentMethod paymentMethod = PaymentMethod.fromLabel(orderRequest.getPaymentMethod());
-        order.setPaymentMethod(paymentMethod);
-        if (paymentMethod == PaymentMethod.CASH_ON_DELIVERY) {
-            order.setStatus(OrderStatus.PENDING);  // chờ xác nhận
-        } else {
-            order.setStatus(OrderStatus.WAITING);  // tạm thời coi như thanh toán đã thành công
-        }
+        order.setOrderDate(LocalDateTime.now());
+        order.setDeliveryMethod(deliveryMethod);
+        order.setPaymentMethod(PaymentMethod.fromLabel(orderRequest.getPaymentMethod()));
+        order.setTotalMoney(totalMoney);
+        order.setTrackingNumber(generateTrackingNumber());
+        order.setStatus(OrderStatus.PENDING);
 
         Order orderSaved = orderRepository.save(order);
 
-        List<OrderItemRequest> orderItemRequests = orderRequest.getItems();
-        for (OrderItemRequest item : orderItemRequests) {
-            ProductVariant variant = productVariantRepository.findByIdForUpdate(item.getVariantId())
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
-            if (variant.getStockQuantity() < item.getQuantity()) {
-                throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
-            }
+        // tạo order details + trừ kho
+        for (int i = 0; i < orderRequest.getItems().size(); i++) {
+            OrderItemRequest reqItem = orderRequest.getItems().get(i);
+            OrderItemResponse respItem = responseItems.get(i);
 
-            variant.setStockQuantity(variant.getStockQuantity() - item.getQuantity());
-            productVariantRepository.save(variant);
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrder(orderSaved);
-            orderDetail.setProductVariant(variant);
-            orderDetail.setQuantity(item.getQuantity());
-            ProductVariantResponse productVariantResponse = productVariantMapper.toProductVariantResponse(variant);
-            orderDetail.setPrice(productVariantResponse.getFinalPrice());
-            orderDetailRepository.save(orderDetail);
+            ProductVariant variant = productVariantRepository
+                    .findByIdForUpdate(reqItem.getVariantId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
+
+            variant.setStockQuantity(
+                    variant.getStockQuantity() - reqItem.getQuantity()
+            );
+
+            OrderDetail detail = new OrderDetail();
+            detail.setOrder(orderSaved);
+            detail.setProductVariant(variant);
+            detail.setQuantity(reqItem.getQuantity());
+            detail.setPrice(respItem.getProductVariant().getFinalPrice());
+
+            orderDetailRepository.save(detail);
         }
+
         if (Boolean.TRUE.equals(orderRequest.getFromCart())) {
             List<Long> variantIds = orderRequest.getItems().stream()
                     .map(OrderItemRequest::getVariantId)
@@ -110,59 +158,61 @@ public class OrderService {
             List<CartItem> cartItems = cartItemRepository.findByCartAndVariantIn(cart, variantIds);
             cartItemRepository.deleteAll(cartItems);
         }
-        preview.setOrderDate(now);
-        preview.setStatus(order.getStatus().getLabel());
-        preview.setTrackingNumber(trackingNumber);
-        return preview;
+
+        OrderResponse response = new OrderResponse();
+        response.setItems(responseItems);
+        response.setSubtotal(subtotal);
+        response.setShippingFee(shippingFee);
+        response.setTotalMoney(totalMoney);
+        response.setOrderDate(orderSaved.getOrderDate());
+        response.setStatus(orderSaved.getStatus().getLabel());
+        response.setTrackingNumber(orderSaved.getTrackingNumber());
+
+        return response;
     }
 
-    public OrderResponse previewOrder(OrderRequest orderRequest) {
-        User currentUser = getCurrentUser();
-        List<OrderItemRequest> requestItems = orderRequest.getItems();
+
+    private List<OrderItemResponse> buildOrderItems(
+            List<OrderItemRequest> items,
+            boolean forUpdate
+    ) {
         List<OrderItemResponse> responseItems = new ArrayList<>();
-        for (OrderItemRequest item : requestItems) {
-            OrderItemResponse responseItem = new OrderItemResponse();
-            ProductVariant productVariant = productVariantRepository.findById(item.getVariantId())
+
+        for (OrderItemRequest item : items) {
+            ProductVariant variant = forUpdate
+                    ? productVariantRepository.findByIdForUpdate(item.getVariantId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED))
+                    : productVariantRepository.findById(item.getVariantId())
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
-            ProductVariantResponse productVariantResponse = productVariantMapper.toProductVariantResponse(productVariant);
-            if (productVariant.getStockQuantity() < item.getQuantity()) {
+
+            if (variant.getStockQuantity() < item.getQuantity()) {
                 throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
             }
-            productVariantResponse.setStockQuantity(productVariant.getStockQuantity() - item.getQuantity());
-            Long finalPrice = productVariantResponse.getFinalPrice();
+
+            ProductVariantResponse variantResp =
+                    productVariantMapper.toProductVariantResponse(variant);
+
+            if (forUpdate) {
+                variantResp.setStockQuantity(
+                        variant.getStockQuantity() - item.getQuantity()
+                );
+            }
+
+
+            Long finalPrice = variantResp.getFinalPrice();
             Integer quantity = item.getQuantity();
+
+            OrderItemResponse responseItem = new OrderItemResponse();
             responseItem.setQuantity(quantity);
-            responseItem.setProductVariant(productVariantResponse);
+            responseItem.setProductVariant(variantResp);
             responseItem.setTotalItemPrice(finalPrice * quantity);
+
             responseItems.add(responseItem);
         }
 
-        Long subtotal = responseItems.stream()
-                .mapToLong(OrderItemResponse::getTotalItemPrice)
-                .sum();
-
-        Address address = addressRepository.findByUserAndId(currentUser, orderRequest.getShippingAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED));
-
-        DeliveryMethod deliveryMethod = DeliveryMethod.fromLabel(orderRequest.getDeliveryMethod());
-
-        Long shippingFee = calculateShippingFee(subtotal, address, deliveryMethod);
-
-        Long totalMoney = subtotal + shippingFee;
-
-        OrderResponse response = new OrderResponse();
-        response.setDeliveryAddress(addressMapper.toAddressResponse(address));
-        response.setCustomerNote(orderRequest.getCustomerNote());
-        response.setDeliveryMethod(orderRequest.getDeliveryMethod());
-        response.setPaymentMethod(orderRequest.getPaymentMethod());
-        response.setShippingFee(shippingFee);
-        response.setSubtotal(subtotal);
-        response.setTotalMoney(totalMoney);
-        response.setItems(responseItems);
-
-        return response;
-
+        return responseItems;
     }
+
 
     private Long calculateShippingFee(long subtotal, Address address, DeliveryMethod deliveryMethod) {
         // Miễn phí nếu subtotal >= 1 triệu

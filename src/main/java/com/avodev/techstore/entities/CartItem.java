@@ -26,9 +26,9 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "variant_id", nullable = false)
     ProductVariant variant;
-    
+
     Integer quantity;
 
-    @Column(name = "create_at")
+    @Column(name = "created_at")
     LocalDateTime createdAt;
 }

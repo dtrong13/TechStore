@@ -27,6 +27,6 @@ public class WishlistItem {
     @JoinColumn(name = "variant_id", nullable = false)
     ProductVariant variant;
 
-    @Column(name = "create_at")
+    @Column(name = "created_at")
     LocalDateTime createdAt;
 }

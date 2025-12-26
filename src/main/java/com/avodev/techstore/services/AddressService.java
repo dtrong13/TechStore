@@ -37,6 +37,7 @@ public class AddressService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
+
     public List<AddressResponse> getAllAddresses() {
         User currentUser = getCurrentUser();
         List<Address> userAddresses = addressRepository.findAllByUser(currentUser);
