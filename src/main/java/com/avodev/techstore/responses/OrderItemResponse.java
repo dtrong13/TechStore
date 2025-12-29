@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItemResponse {
-    ProductVariantResponse productVariant;
+    ProductVariantCardResponse productVariant;
     Integer quantity;
     Long totalItemPrice;
 }

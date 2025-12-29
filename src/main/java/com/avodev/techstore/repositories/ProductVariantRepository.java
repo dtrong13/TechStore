@@ -13,7 +13,8 @@ import java.util.Optional;
 
 @Repository
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, Long>, JpaSpecificationExecutor<ProductVariant> {
-    List<ProductVariant> findByIdIn(List<Long> ids);
+
+    List<ProductVariant> findByProductId(Long productId);
 
     Optional<ProductVariant> findById(Long id);
 

@@ -12,7 +12,7 @@ import com.avodev.techstore.repositories.ProductVariantRepository;
 import com.avodev.techstore.repositories.UserRepository;
 import com.avodev.techstore.repositories.WishlistItemRepository;
 import com.avodev.techstore.repositories.WishlistRepository;
-import com.avodev.techstore.responses.ProductVariantResponse;
+import com.avodev.techstore.responses.ProductVariantCardResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -51,13 +51,13 @@ public class WishlistService {
                 });
     }
 
-    public List<ProductVariantResponse> getWishlistItems() {
+    public List<ProductVariantCardResponse> getWishlistItems() {
         User currentUser = getCurrentUser();
         Wishlist currentWishlist = getCurrentWishlist(currentUser);
         List<WishlistItem> wishlistItems = wishlistItemRepo.findByWishlist(currentWishlist);
-        List<ProductVariantResponse> resultList = new ArrayList<>();
+        List<ProductVariantCardResponse> resultList = new ArrayList<>();
         for (WishlistItem item : wishlistItems) {
-            ProductVariantResponse response = productVariantMapper.toProductVariantResponse(item.getVariant());
+            ProductVariantCardResponse response = productVariantMapper.toProductVariantResponse(item.getVariant());
             resultList.add(response);
         }
         return resultList;
@@ -93,7 +93,7 @@ public class WishlistService {
         wishlistItemRepo.deleteAll(currentWishlist.getItems());
     }
 
-    
+
     public int getItemCount() {
         User currentUser = getCurrentUser();
         Wishlist currentWishlist = getCurrentWishlist(currentUser);

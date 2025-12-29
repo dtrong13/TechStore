@@ -5,11 +5,11 @@ import com.avodev.techstore.responses.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +17,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandle {
 
-    private static final String MIN_ATTRIBUTE = "min";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handlingException(Exception exception) {
@@ -36,7 +35,9 @@ public class GlobalExceptionHandle {
         ErrorCode errorCode = exception.getErrorCode();
         ApiResponse<Object> apiResponse = new ApiResponse<>();
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
+        apiResponse.setMessage(
+                mapAttributes(errorCode.getMessage(), exception.getMeta())
+        );
         apiResponse.setData(exception.getMeta());
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
@@ -75,8 +76,16 @@ public class GlobalExceptionHandle {
     }
 
     private String mapAttributes(String message, Map<String, Object> attributes) {
-        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+        if (attributes == null || attributes.isEmpty()) return message;
 
-        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
+        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+            message = message.replace(
+                    "{" + entry.getKey() + "}",
+                    String.valueOf(entry.getValue())
+            );
+        }
+        return message;
     }
+
+
 }

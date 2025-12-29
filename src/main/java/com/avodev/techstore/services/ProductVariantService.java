@@ -4,20 +4,22 @@ package com.avodev.techstore.services;
 import com.avodev.techstore.dtos.Pagination;
 import com.avodev.techstore.dtos.SortField;
 import com.avodev.techstore.entities.Discount;
+import com.avodev.techstore.entities.Product;
 import com.avodev.techstore.entities.ProductVariant;
 import com.avodev.techstore.entities.VariantImage;
 import com.avodev.techstore.enums.DiscountType;
 import com.avodev.techstore.enums.SortDirection;
+import com.avodev.techstore.exceptions.AppException;
+import com.avodev.techstore.exceptions.ErrorCode;
 import com.avodev.techstore.mappers.ProductVariantMapper;
+import com.avodev.techstore.repositories.ProductRepository;
 import com.avodev.techstore.repositories.ProductVariantRepository;
 import com.avodev.techstore.repositories.VariantImageRepository;
 import com.avodev.techstore.repositories.VariantSpecificationRepository;
 import com.avodev.techstore.requests.ProductVariantRequest;
+import com.avodev.techstore.requests.ProductVariantSearchRequest;
 import com.avodev.techstore.requests.SearchRequest;
-import com.avodev.techstore.responses.PageableResponse;
-import com.avodev.techstore.responses.ProductVariantDetailResponse;
-import com.avodev.techstore.responses.ProductVariantResponse;
-import com.avodev.techstore.responses.VariantSpecResponse;
+import com.avodev.techstore.responses.*;
 import com.avodev.techstore.specifications.ProductVariantSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +34,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,13 +45,14 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductVariantService {
 
+    ProductRepository productRepository;
     ProductVariantRepository productVariantRepository;
     ProductVariantMapper productVariantMapper;
     VariantImageRepository variantImageRepository;
     VariantSpecificationRepository variantSpecificationRepository;
 
-    public PageableResponse<ProductVariantResponse> searchProductVariants(SearchRequest<ProductVariantRequest> request) {
-        ProductVariantRequest filter = request.getFilter();
+    public PageableResponse<ProductVariantCardResponse> searchProductVariants(SearchRequest<ProductVariantSearchRequest> request) {
+        ProductVariantSearchRequest filter = request.getFilter();
         Pagination pagination = request.getPagination();
         List<SortField> sorts = request.getSorts();
 
@@ -89,13 +92,12 @@ public class ProductVariantService {
                 .and(ProductVariantSpecification.hasAttributes(filter.getSpecFilters()));
 
         Page<ProductVariant> pageResult = productVariantRepository.findAll(spec, pageable);
-        DecimalFormat moneyFormat = new DecimalFormat("#,###");
         List<ProductVariant> productVariants = pageResult.getContent();
-        List<ProductVariantResponse> responseList = productVariants.stream()
+        List<ProductVariantCardResponse> responseList = productVariants.stream()
                 .map(productVariantMapper::toProductVariantResponse)
                 .collect(Collectors.toList());
 
-        return PageableResponse.<ProductVariantResponse>builder()
+        return PageableResponse.<ProductVariantCardResponse>builder()
                 .content(responseList)
                 .pageNumber(pageResult.getNumber())
                 .pageSize(pageResult.getSize())
@@ -121,10 +123,9 @@ public class ProductVariantService {
         }
     }
 
-
     public ProductVariantDetailResponse getVariantDetail(Long variantId) {
         ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new RuntimeException("Variant not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
         ProductVariantDetailResponse result = new ProductVariantDetailResponse();
         result.setId(variantId);
         result.setVariantName(variant.getVariantName());
@@ -180,6 +181,46 @@ public class ProductVariantService {
         result.setVariantSpecs(specs);
 
         return result;
+    }
+
+
+    public ProductVariantResponse createVariant(ProductVariantRequest req) {
+        Product product = productRepository.findById(req.getProductId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED, Map.of("id", req.getProductId())));
+
+        ProductVariant v = ProductVariant.builder()
+                .variantName(req.getVariantName())
+                .price(req.getPrice())
+                .stockQuantity(req.getStockQuantity())
+                .product(product)
+                .build();
+
+        return productVariantMapper.toResponse(productVariantRepository.save(v));
+    }
+
+    public ProductVariantResponse updateVariant(Long id, ProductVariantRequest req) {
+        ProductVariant v = productVariantRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
+
+        v.setVariantName(req.getVariantName());
+        v.setPrice(req.getPrice());
+        v.setStockQuantity(req.getStockQuantity());
+
+        return productVariantMapper.toResponse(productVariantRepository.save(v));
+    }
+
+    public void deleteVariant(Long id) {
+        if (!productVariantRepository.existsById(id)) {
+            throw new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED);
+        }
+        productVariantRepository.deleteById(id);
+    }
+
+    public void updateStock(Long id, Integer stock) {
+        ProductVariant v = productVariantRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXISTED));
+        v.setStockQuantity(stock);
+        productVariantRepository.save(v);
     }
 
 }

@@ -14,7 +14,7 @@ import com.avodev.techstore.requests.OrderItemRequest;
 import com.avodev.techstore.requests.OrderRequest;
 import com.avodev.techstore.responses.OrderItemResponse;
 import com.avodev.techstore.responses.OrderResponse;
-import com.avodev.techstore.responses.ProductVariantResponse;
+import com.avodev.techstore.responses.ProductVariantCardResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -172,9 +172,7 @@ public class OrderService {
     }
 
 
-    private List<OrderItemResponse> buildOrderItems(
-            List<OrderItemRequest> items,
-            boolean forUpdate
+    private List<OrderItemResponse> buildOrderItems(List<OrderItemRequest> items, boolean forUpdate
     ) {
         List<OrderItemResponse> responseItems = new ArrayList<>();
 
@@ -189,7 +187,7 @@ public class OrderService {
                 throw new AppException(ErrorCode.NOT_ENOUGH_STOCK);
             }
 
-            ProductVariantResponse variantResp =
+            ProductVariantCardResponse variantResp =
                     productVariantMapper.toProductVariantResponse(variant);
 
             if (forUpdate) {

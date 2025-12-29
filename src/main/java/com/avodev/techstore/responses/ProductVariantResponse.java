@@ -14,7 +14,6 @@ public class ProductVariantResponse {
     String variantName;
     Long price;
     Integer stockQuantity;
-    String discountText;
-    Long finalPrice;
-    String imageUrl;
+    Long productId;
+    String productName;
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Table(name = "products")
 @Setter
@@ -12,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Product extends BaseEntity  {
+public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -30,5 +32,10 @@ public class Product extends BaseEntity  {
     @ManyToOne
     @JoinColumn(name = "brand_id")
     Brand brand;
+
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ProductVariant> variants;
+
 
 }

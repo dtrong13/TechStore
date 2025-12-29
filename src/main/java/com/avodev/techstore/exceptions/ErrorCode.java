@@ -10,11 +10,27 @@ public enum ErrorCode {
     INVALID_KEY(1001, "Invalid input key.", HttpStatus.BAD_REQUEST),
     INVALID_PHONENUMBER(1002, "Phone number must contain exactly 10 digits.", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1003, "Password must be at least {min} characters long.", HttpStatus.BAD_REQUEST),
-    INVALID_FULLNAME(1005, "Full name must be at least {min} characters long.", HttpStatus.BAD_REQUEST),
+    INVALID_FULLNAME(1004, "Full name must be at least {min} characters long.", HttpStatus.BAD_REQUEST),
     INVALID_ADDRESS_TYPE(1005, "Invalid address type, please try again", HttpStatus.BAD_REQUEST),
-    INVALID_GENDER_TYPE(1005, "Invalid gender type, please try again", HttpStatus.BAD_REQUEST),
+    INVALID_GENDER_TYPE(1006, "Invalid gender type, please try again", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_REQUIRED(1007, "The product name cannot be blank.", HttpStatus.BAD_REQUEST),
+    CATEGORY_ID_REQUIRED(1008, "Category ID is required.", HttpStatus.BAD_REQUEST),
+    CATEGORY_ID_INVALID(1009, "Brand ID must be a positive number.", HttpStatus.BAD_REQUEST),
+    BRAND_ID_REQUIRED(1010, "Brand ID is required.", HttpStatus.BAD_REQUEST),
+    BRAND_ID_INVALID(1011, "Brand ID must be a positive number.", HttpStatus.BAD_REQUEST),
 
-    CANNOT_DELETE_DEFAULT_ADDRESS(1006, "Can not delete default address, please try again", HttpStatus.BAD_REQUEST),
+    VARIANT_NAME_REQUIRED(1012, "The product variant name cannot be blank.", HttpStatus.BAD_REQUEST),
+    PRODUCT_ID_REQUIRED(1013, "Product ID is required.", HttpStatus.BAD_REQUEST),
+    PRODUCT_ID_INVALID(1014, "Product ID must be a positive number.", HttpStatus.BAD_REQUEST),
+    PRICE_REQUIRED(1015, "Price is required.", HttpStatus.BAD_REQUEST),
+    PRICE_INVALID(1016, "Price must be a positive number.", HttpStatus.BAD_REQUEST),
+    STOCK_QUANTITY_REQUIRED(1017, "Stock quantity is required.", HttpStatus.BAD_REQUEST),
+    STOCK_QUANTITY_INVALID(1018, "Stock quantity must be zero or positive number.", HttpStatus.BAD_REQUEST),
+
+    INVALID_ORDER_STATUS(1019, "Invalid order status, please try again.", HttpStatus.BAD_REQUEST),
+
+
+    CANNOT_DELETE_DEFAULT_ADDRESS(1020, "Can not delete default address, please try again", HttpStatus.BAD_REQUEST),
 
 
     // ================= User Errors =================
@@ -26,7 +42,10 @@ public enum ErrorCode {
 
     PRODUCT_VARIANT_NOT_EXISTED(2005, "Product variant not found.", HttpStatus.NOT_FOUND),
     NOT_ENOUGH_STOCK(2006, "Not enough stock for this product variant.", HttpStatus.BAD_REQUEST),
-    CART_NOT_EXISTED(2006, "Cart not found.", HttpStatus.NOT_FOUND),
+    CART_NOT_EXISTED(2007, "Cart not found.", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_EXISTED(2008, "Category not found.", HttpStatus.NOT_FOUND),
+    BRAND_NOT_EXISTED(2009, "Brand not found.", HttpStatus.NOT_FOUND),
+    PRODUCT_NOT_EXISTED(2010, "Product not found with id {id}.", HttpStatus.NOT_FOUND),
 
 
     // ================= Authentication / Authorization Errors =================

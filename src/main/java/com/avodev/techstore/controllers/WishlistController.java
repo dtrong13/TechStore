@@ -1,7 +1,7 @@
 package com.avodev.techstore.controllers;
 
 import com.avodev.techstore.responses.ApiResponse;
-import com.avodev.techstore.responses.ProductVariantResponse;
+import com.avodev.techstore.responses.ProductVariantCardResponse;
 import com.avodev.techstore.services.WishlistService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("wishlists")
+@RequestMapping("/wishlists")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
@@ -20,8 +20,8 @@ public class WishlistController {
     WishlistService wishlistService;
 
     @GetMapping
-    public ApiResponse<List<ProductVariantResponse>> getWishlistItems() {
-        return ApiResponse.<List<ProductVariantResponse>>builder()
+    public ApiResponse<List<ProductVariantCardResponse>> getWishlistItems() {
+        return ApiResponse.<List<ProductVariantCardResponse>>builder()
                 .data(wishlistService.getWishlistItems())
                 .build();
     }

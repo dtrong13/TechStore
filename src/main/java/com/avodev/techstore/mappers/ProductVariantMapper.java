@@ -4,6 +4,7 @@ import com.avodev.techstore.entities.Discount;
 import com.avodev.techstore.entities.ProductVariant;
 import com.avodev.techstore.entities.VariantImage;
 import com.avodev.techstore.enums.DiscountType;
+import com.avodev.techstore.responses.ProductVariantCardResponse;
 import com.avodev.techstore.responses.ProductVariantResponse;
 import com.avodev.techstore.services.VariantImageService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,8 @@ import java.math.RoundingMode;
 public class ProductVariantMapper {
     private final VariantImageService variantImageService;
 
-    public ProductVariantResponse toProductVariantResponse(ProductVariant productVariant) {
-        ProductVariantResponse response = new ProductVariantResponse();
+    public ProductVariantCardResponse toProductVariantResponse(ProductVariant productVariant) {
+        ProductVariantCardResponse response = new ProductVariantCardResponse();
         response.setId(productVariant.getId());
         response.setVariantName(productVariant.getVariantName());
         response.setPrice(productVariant.getPrice());
@@ -65,5 +66,16 @@ public class ProductVariantMapper {
         }
 
         return response;
+    }
+
+    public ProductVariantResponse toResponse(ProductVariant p) {
+        return ProductVariantResponse.builder()
+                .id(p.getId())
+                .variantName(p.getVariantName())
+                .price(p.getPrice())
+                .stockQuantity(p.getStockQuantity())
+                .productId(p.getProduct() != null ? p.getProduct().getId() : null)
+                .productName(p.getProduct() != null ? p.getProduct().getName() : null)
+                .build();
     }
 }
